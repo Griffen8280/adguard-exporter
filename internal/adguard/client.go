@@ -6,17 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
-	"strconv"
-	"strings"
 	"time"
+  b64 "encoding/base64"
 
-	"github.com/eko/adguard-exporter/internal/metrics"
+	"github.com/ebrianne/adguard-exporter/internal/metrics"
 )
 
 var (
-	loginURLPattern = "%s://%s:%d/login.html"
 	statsURLPattern = "%s://%s:%d/control/stats"
 )
 
@@ -27,12 +24,13 @@ type Client struct {
 	protocol   string
 	hostname   string
 	port       uint16
+  username   string
 	password   string
 	sessionID  string
 }
 
 // NewClient method initializes a new AdGuard  client.
-func NewClient(protocol, hostname string, port uint16, password, interval time.Duration) *Client {
+func NewClient(protocol, hostname string, port uint16, username, password string, interval time.Duration) *Client {
 	if protocol != "http" && protocol != "https" {
 		log.Printf("protocol %s is invalid. Must be http or https.", protocol)
 		os.Exit(1)
@@ -42,6 +40,7 @@ func NewClient(protocol, hostname string, port uint16, password, interval time.D
 		protocol: protocol,
 		hostname: hostname,
 		port:     port,
+    username: username,
 		password: password,
 		interval: interval,
 		httpClient: http.Client{
@@ -68,33 +67,6 @@ func (c *Client) setMetrics(stats *Stats) {
 	metrics.AvgProcessingTime.WithLabelValues(c.hostname).Set(float64(stats.AvgProcessingTime))
 }
 
-func (c *Client) getPHPSessionID() (sessionID string) {
-	loginURL := fmt.Sprintf(loginURLPattern, c.protocol, c.hostname, c.port)
-	values := url.Values{"pw": []string{c.password}}
-
-	req, err := http.NewRequest("POST", loginURL, strings.NewReader(values.Encode()))
-	if err != nil {
-		log.Fatal("An error has occured when creating HTTP statistics request", err)
-	}
-
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Content-Length", strconv.Itoa(len(values.Encode())))
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		log.Printf("An error has occured during login to Adguard: %v", err)
-	}
-
-	for _, cookie := range resp.Cookies() {
-		if cookie.Name == "PHPSESSID" {
-			sessionID = cookie.Value
-			break
-		}
-	}
-
-	return
-}
-
 func (c *Client) getStatistics() *Stats {
 	var stats Stats
 
@@ -109,10 +81,10 @@ func (c *Client) getStatistics() *Stats {
 		c.authenticateRequest(req)
 	}
 
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		log.Println("An error has occured during retrieving Adguard statistics", err)
-	}
+  resp, err := c.httpClient.Do(req)
+  if err != nil {
+    log.Printf("An error has occured during login to Adguard: %v", err)
+  }
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -127,11 +99,15 @@ func (c *Client) getStatistics() *Stats {
 	return &stats
 }
 
+func (c *Client) basicAuth() string {
+  auth := c.username + ":" + c.password
+  return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
 func (c *Client) isUsingPassword() bool {
 	return len(c.password) > 0
 }
 
 func (c *Client) authenticateRequest(req *http.Request) {
-	cookie := http.Cookie{Name: "PHPSESSID", Value: c.getPHPSessionID()}
-	req.AddCookie(&cookie)
+  req.Header.Add("Authorization", "Basic " + c.basicAuth())
 }

@@ -26,14 +26,14 @@ func main() {
 
 	metrics.Init()
 
-	initAdguardClient(conf.AdguardProtocol, conf.AdguardHostname, conf.AdguardPort, conf.AdguardPassword, conf.Interval)
+	initAdguardClient(conf.AdguardProtocol, conf.AdguardHostname, conf.AdguardPort, conf.AdguardUsername, conf.AdguardPassword, conf.Interval)
 	initHttpServer(conf.Port)
 
 	handleExitSignal()
 }
 
-func initAdguardClient(protocol, hostname string, port uint16, password, interval time.Duration) {
-	client := adguard.NewClient(protocol, hostname, port, password, interval)
+func initAdguardClient(protocol, hostname string, port uint16, username, password string, interval time.Duration) {
+	client := adguard.NewClient(protocol, hostname, port, username, password, interval)
 	go client.Scrape()
 }
 
