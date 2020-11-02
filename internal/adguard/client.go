@@ -89,7 +89,7 @@ func (c *Client) getStatistics() *Stats {
 
   req, err := http.NewRequest("GET", statsURL, nil)
   if err != nil {
-    log.Fatal("An error has occured when creating HTTP statistics request ", err)
+    log.Fatal("An error has occurred when creating HTTP statistics request ", err)
   }
 
   if c.isUsingPassword() {
@@ -98,7 +98,7 @@ func (c *Client) getStatistics() *Stats {
 
   resp, err := c.httpClient.Do(req)
   if err != nil {
-    log.Printf("An error has occured during login to Adguard: %v", err)
+    log.Printf("An error has occurred during login to Adguard: %v", err)
   }
 
   body, err := ioutil.ReadAll(resp.Body)

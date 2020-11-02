@@ -2,10 +2,7 @@ package adguard
 
 import "fmt"
 
-const (
-  enabledStatus = "enabled"
-)
-
+// Stats struct is the Adguard statistics JSON API corresponding model.
 type Stats struct {
   AvgProcessingTime     float64            `json:"avg_processing_time"`
   DnsQueries            int                `json:"num_dns_queries"`

@@ -7,6 +7,7 @@ import (
 )
 
 var (
+  // AvgProcessingTime - Average processing time for a DNS query
   AvgProcessingTime = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "avg_processing_time",
@@ -16,6 +17,7 @@ var (
     []string{"hostname"},
   )
 
+  // DnsQueries - Number of DNS queries
   DnsQueries = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "num_dns_queries",
@@ -25,6 +27,7 @@ var (
     []string{"hostname"},
   )
 
+  // BlockedFiltering - Number of DNS queries blocked
   BlockedFiltering = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "num_blocked_filtering",
@@ -34,6 +37,7 @@ var (
     []string{"hostname"},
   )
 
+  // ParentalFiltering - Number of DNS queries replaced by parental control
   ParentalFiltering = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "num_replaced_parental",
@@ -43,6 +47,7 @@ var (
     []string{"hostname"},
   )
 
+  // SafeBrowsingFiltering - Number of DNS queries replaced by safe browsing
   SafeBrowsingFiltering = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "num_replaced_safebrowsing",
@@ -52,6 +57,7 @@ var (
     []string{"hostname"},
   )
 
+  // SafeSearchFiltering - Number of DNS queries replaced by safe search
   SafeSearchFiltering = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "num_replaced_safesearch",
@@ -61,6 +67,7 @@ var (
     []string{"hostname"},
   )
 
+  // TopQueries - The number of top queries
   TopQueries = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "top_queried_domains",
@@ -70,6 +77,7 @@ var (
     []string{"hostname", "domain"},
   )
 
+  // TopBlocked - The number of top domains blocked
   TopBlocked = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "top_blocked_domains",
@@ -79,6 +87,7 @@ var (
     []string{"hostname", "domain"},
   )
 
+  // TopClients - The number of top clients
   TopClients = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
       Name:      "top_clients",
