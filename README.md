@@ -6,7 +6,9 @@
 This is a Prometheus exporter for [AdguardHome](https://github.com/AdguardTeam/AdguardHome)'s Raspberry PI ad blocker.
 It is based on the famous pihole-exporter [available here](https://github.com/eko/pihole-exporter/)
 
-<!-- Grafana dashboard is [available here](https://grafana.com/dashboards/10176) on the Grafana dashboard website and also [here](https://raw.githubusercontent.com/ebrianne/adguard-exporter/master/grafana/dashboard.json) on the GitHub repository. -->
+![Grafana dashboard](https://raw.githubusercontent.com/ebrianne/adguard-exporter/master/grafana/dashboard.png)
+
+Grafana dashboard is [available here](https://grafana.com/dashboards/10176) on the Grafana dashboard website and also [here](https://raw.githubusercontent.com/ebrianne/adguard-exporter/master/grafana/dashboard.json) on the GitHub repository.
 
 ## Prerequisites
 
