@@ -1,6 +1,5 @@
 # AdguardHome Prometheus Exporter
 
-![Build/Push (master)](https://github.com/ebrianne/adguard-exporter/workflows/Build/Push%20(master)/badge.svg)
 [![GoDoc](https://godoc.org/github.com/ebrianne/adguard-exporter?status.png)](https://godoc.org/github.com/ebrianne/adguard-exporter)
 [![GoReportCard](https://goreportcard.com/badge/github.com/ebrianne/adguard-exporter)](https://goreportcard.com/report/github.com/ebrianne/adguard-exporter)
 
