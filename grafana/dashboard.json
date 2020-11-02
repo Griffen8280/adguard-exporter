@@ -1,9 +1,57 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "7.3.1"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table-old",
+      "name": "Table (old)",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
         "builtIn": 1,
-        "datasource": "Prometheus",
+        "datasource": "${DS_PROMETHEUS}",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -16,13 +64,13 @@
   "editable": true,
   "gnetId": 10176,
   "graphTooltip": 0,
-  "id": 25,
-  "iteration": 1604354495921,
+  "id": null,
+  "iteration": 1604355788357,
   "links": [],
   "panels": [
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -36,7 +84,7 @@
     },
     {
       "cacheTimeout": null,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -132,7 +180,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -224,7 +272,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "decimals": null,
       "fieldConfig": {
         "defaults": {
@@ -309,7 +357,7 @@
     },
     {
       "cacheTimeout": null,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -393,7 +441,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -466,6 +514,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:100",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -474,6 +523,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:101",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -489,7 +539,7 @@
     },
     {
       "columns": [],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -557,7 +607,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -631,6 +681,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:302",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -639,6 +690,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:303",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -654,7 +706,7 @@
     },
     {
       "columns": [],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -725,7 +777,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -798,6 +850,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:355",
           "format": "percent",
           "label": null,
           "logBase": 1,
@@ -806,6 +859,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:356",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -821,7 +875,7 @@
     },
     {
       "columns": [],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -896,12 +950,8 @@
     "list": [
       {
         "allValue": null,
-        "current": {
-          "selected": false,
-          "text": "192.168.10.252",
-          "value": "192.168.10.252"
-        },
-        "datasource": "Prometheus",
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
         "definition": "label_values(adguard_num_dns_queries, hostname)",
         "error": null,
         "hide": 0,
