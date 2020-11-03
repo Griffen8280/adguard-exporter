@@ -96,6 +96,16 @@ var (
 		},
 		[]string{"hostname", "client"},
 	)
+
+	// Answer
+	QueryTypes = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "query_types",
+			Namespace: "adguard",
+			Help:      "This represent the DNS query types",
+		},
+		[]string{"hostname", "type"},
+	)
 )
 
 // Init initializes all Prometheus metrics made available by AdGuard  exporter.
@@ -109,6 +119,7 @@ func Init() {
 	initMetric("top_queried_domains", TopQueries)
 	initMetric("top_blocked_domains", TopBlocked)
 	initMetric("top_clients", TopClients)
+	initMetric("query_types", QueryTypes)
 }
 
 func initMetric(name string, metric *prometheus.GaugeVec) {
