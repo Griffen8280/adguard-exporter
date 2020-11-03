@@ -15,6 +15,11 @@ type Stats struct {
 	TopClients            []map[string]int `json:"top_clients"`
 }
 
+// LogStats struct for the Adguard log statistics JSON API corresponding model.
+type LogStats struct {
+  
+}
+
 // ToString method returns a string of the current statistics struct.
 func (s *Stats) ToString() string {
 	return fmt.Sprintf("%d ads blocked / %d total DNS queries", s.BlockedFiltering, s.DnsQueries)
