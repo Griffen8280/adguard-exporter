@@ -129,3 +129,4 @@ scrape_configs:
 | adguard_top_blocked_domains       | This represent the top blocked domains                               |
 | adguard_top_clients               | This represent the top clients                                       |
 | adguard_top_queried_domains       | This represent the top domains that are queried                      |
+| adguard_query_types               | This represent the types of DNS queries                              |

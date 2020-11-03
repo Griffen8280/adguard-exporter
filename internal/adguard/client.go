@@ -131,8 +131,8 @@ func (c *Client) setLogMetrics(logdata *LogData) {
 		logstats := logdata.Data[i]
 		if logstats.DNS != nil {
 			for j := range logstats.DNS {
-				dns_type := logstats.DNS[j].Type
-				m[dns_type] += 1
+				dnsType := logstats.DNS[j].Type
+				m[dnsType] += 1
 			}
 		}
 	}

@@ -97,7 +97,7 @@ var (
 		[]string{"hostname", "client"},
 	)
 
-	// Answer
+	// QueryTypes - The type of DNS Queries (A, AAAA...)
 	QueryTypes = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name:      "query_types",

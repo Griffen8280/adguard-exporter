@@ -15,26 +15,26 @@ type Stats struct {
 	TopClients            []map[string]int `json:"top_clients"`
 }
 
-// DNS answer struct in the log
+// DNSAnswer struct from LogStats
 type DNSAnswer struct {
 	Ttl   float64 `json:"ttl"`
 	Type  string  `json:"type"`
 	Value string  `json:"value"`
 }
 
-// DNS query struct in the log
+// DNSQuery struct from LogStats
 type DNSQuery struct {
 	Class string `json:"class"`
 	Host  string `json:"host"`
 	Type  string `json:"type"`
 }
 
-// LogStats struct for the Adguard log statistics JSON API corresponding model.
+// LogStats struct, sub struct of LogData to collect the dns stats from the log
 type LogStats struct {
 	DNS          []DNSAnswer `json:"answer"`
 	DNSSec       bool        `json:"answer_dnssec"`
 	Client       string      `json:"client"`
-	Client_proto string      `json:"client_proto"`
+	ClientProto  string      `json:"client_proto"`
 	Elapsed      string      `json:"elapsedMs"`
 	Question     DNSQuery    `json:"question"`
 	Reason       string      `json:"reason"`
@@ -43,6 +43,7 @@ type LogStats struct {
 	Upstream     string      `json:"upstream"`
 }
 
+// LogData struct for the Adguard log statistics JSON API corresponding model.
 type LogData struct {
 	Data   []LogStats `json:"data"`
 	Oldest string     `json:"oldest"`
