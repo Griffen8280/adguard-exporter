@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 	"os"
 	"os/signal"
@@ -27,24 +26,14 @@ func main() {
 
 	metrics.Init()
 
-	initAdguardClient(conf.AdguardProtocol, conf.AdguardHostname, conf.AdguardPort, conf.AdguardUsername, conf.AdguardPassword, conf.Interval)
-	initHttpServer(conf.Port)
+	initAdguardClient(conf.AdguardProtocol, conf.AdguardHostname, conf.AdguardUsername, conf.AdguardPassword, conf.Interval, conf.LogLimit)
+	initHttpServer(conf.ServerPort)
 
 	handleExitSignal()
 }
 
-func basicAuth(username, password string) string {
-	auth := username + ":" + password
-	return base64.StdEncoding.EncodeToString([]byte(auth))
-}
-
-func initAdguardClient(protocol, hostname string, port uint16, username, password string, interval time.Duration) {
-	b64password := ""
-	if len(username) > 0 && len(password) > 0 {
-		b64password = basicAuth(username, password)
-	}
-
-	client := adguard.NewClient(protocol, hostname, port, b64password, interval)
+func initAdguardClient(protocol, hostname string, username, password string, interval time.Duration, logLimit string) {
+	client := adguard.NewClient(protocol, hostname, username, password, interval, logLimit)
 	go client.Scrape()
 }
 

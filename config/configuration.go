@@ -17,22 +17,22 @@ import (
 type Config struct {
 	AdguardProtocol string        `config:"adguard_protocol"`
 	AdguardHostname string        `config:"adguard_hostname"`
-	AdguardPort     uint16        `config:"adguard_port"`
 	AdguardUsername string        `config:"adguard_username"`
 	AdguardPassword string        `config:"adguard_password"`
-	Port            string        `config:"port"`
+	ServerPort      string        `config:"server_port"`
 	Interval        time.Duration `config:"interval"`
+  LogLimit        string        `config:"log_limit"`
 }
 
 func getDefaultConfig() *Config {
 	return &Config{
 		AdguardProtocol: "http",
 		AdguardHostname: "127.0.0.1",
-		AdguardPort:     80,
 		AdguardUsername: "",
 		AdguardPassword: "",
-		Port:            "9617",
+		ServerPort:      "9617",
 		Interval:        10 * time.Second,
+    LogLimit:        "1000",
 	}
 }
 

@@ -106,6 +106,26 @@ var (
 		},
 		[]string{"hostname", "type"},
 	)
+
+	// Running - If Adguard is running
+	Running = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "running",
+			Namespace: "adguard",
+			Help:      "This represent if Adguard is running",
+		},
+		[]string{"hostname"},
+	)
+
+	// ProtectionEnable - If Adguard protection is enabled
+	ProtectionEnabled = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "protection_enabled",
+			Namespace: "adguard",
+			Help:      "This represent if Adguard Protection is enabled",
+		},
+		[]string{"hostname"},
+	)
 )
 
 // Init initializes all Prometheus metrics made available by AdGuard  exporter.
@@ -120,6 +140,8 @@ func Init() {
 	initMetric("top_blocked_domains", TopBlocked)
 	initMetric("top_clients", TopClients)
 	initMetric("query_types", QueryTypes)
+	initMetric("running", Running)
+	initMetric("protection_enabled", ProtectionEnabled)
 }
 
 func initMetric(name string, metric *prometheus.GaugeVec) {

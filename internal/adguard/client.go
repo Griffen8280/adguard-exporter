@@ -1,47 +1,66 @@
 package adguard
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/ebrianne/adguard-exporter/internal/metrics"
+	"github.com/mitchellh/mapstructure"
 )
 
 var (
+	port               uint16
+	statusURLPattern   = "%s://%s:%d/control/status"
 	statsURLPattern    = "%s://%s:%d/control/stats"
-	logstatsURLPattern = "%s://%s:%d/control/querylog"
+	logstatsURLPattern = "%s://%s:%d/control/querylog?limit=%s&response_status=\"all\""
 	m                  map[string]int
 )
 
 // Client struct is a AdGuard  client to request an instance of a AdGuard  ad blocker.
 type Client struct {
-	httpClient  http.Client
-	interval    time.Duration
-	protocol    string
-	hostname    string
-	port        uint16
-	b64password string
+	httpClient http.Client
+	interval   time.Duration
+	logLimit   string
+	protocol   string
+	hostname   string
+	port       uint16
+	username   string
+	password   string
 }
 
 // NewClient method initializes a new AdGuard  client.
-func NewClient(protocol, hostname string, port uint16, b64password string, interval time.Duration) *Client {
-	if protocol != "http" {
-		log.Printf("protocol %s is invalid. Must be http.", protocol)
+func NewClient(protocol, hostname string, username, password string, interval time.Duration, logLimit string) *Client {
+	if protocol != "http" && protocol != "https" {
+		log.Printf("protocol %s is invalid. Must be http or https.", protocol)
 		os.Exit(1)
 	}
 
+	port = 80
+	if protocol == "https" {
+		port = 443
+	}
+
 	return &Client{
-		protocol:    protocol,
-		hostname:    hostname,
-		port:        port,
-		b64password: b64password,
-		interval:    interval,
-		httpClient:  http.Client{},
+		protocol: protocol,
+		hostname: hostname,
+		port:     port,
+		username: username,
+		password: password,
+		interval: interval,
+		logLimit: logLimit,
+		httpClient: http.Client{
+			Transport: &http.Transport{TLSClientConfig: GetTlsConfig()},
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
 	}
 }
 
@@ -50,20 +69,30 @@ func NewClient(protocol, hostname string, port uint16, b64password string, inter
 func (c *Client) Scrape() {
 	for range time.Tick(c.interval) {
 
-		//Get the general stats
-		stats := c.getStatistics()
-		c.setMetrics(stats)
+		allstats := c.getStatistics()
+		//Set the metrics
+		c.setMetrics(allstats.status, allstats.stats, allstats.logStats)
 
-		//Get the log stats
-		logdata := c.getLogStatistics()
-		c.setLogMetrics(logdata)
-
-		log.Printf("New tick of statistics: %s", stats.ToString())
+		log.Printf("New tick of statistics: %s", allstats.stats.ToString())
 	}
 }
 
-// Function to set the general stats
-func (c *Client) setMetrics(stats *Stats) {
+// Function to set the prometheus metrics
+func (c *Client) setMetrics(status *Status, stats *Stats, logstats *LogStats) {
+	//Status
+	var isRunning int = 0
+	if status.Running == true {
+		isRunning = 1
+	}
+	metrics.Running.WithLabelValues(c.hostname).Set(float64(isRunning))
+
+	var isProtected int = 0
+	if status.ProtectionEnabled == true {
+		isProtected = 1
+	}
+	metrics.ProtectionEnabled.WithLabelValues(c.hostname).Set(float64(isProtected))
+
+	//Stats
 	metrics.AvgProcessingTime.WithLabelValues(c.hostname).Set(float64(stats.AvgProcessingTime))
 	metrics.DnsQueries.WithLabelValues(c.hostname).Set(float64(stats.DnsQueries))
 	metrics.BlockedFiltering.WithLabelValues(c.hostname).Set(float64(stats.BlockedFiltering))
@@ -88,51 +117,28 @@ func (c *Client) setMetrics(stats *Stats) {
 			metrics.TopClients.WithLabelValues(c.hostname, source).Set(float64(value))
 		}
 	}
-}
 
-// Function to get the general stats
-func (c *Client) getStatistics() *Stats {
-	log.Printf("Getting general statistics")
-
-	var stats Stats
-	statsURL := fmt.Sprintf(statsURLPattern, c.protocol, c.hostname, c.port)
-
-	req, err := http.NewRequest("GET", statsURL, nil)
-	if err != nil {
-		log.Fatal("An error has occurred when creating HTTP statistics request ", err)
-	}
-
-	if c.isUsingPassword() {
-		c.authenticateRequest(req)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		log.Printf("An error has occurred during login to Adguard: %v", err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Unable to read Adguard statistics HTTP response", err)
-	}
-
-	err = json.Unmarshal(body, &stats)
-	if err != nil {
-		log.Println("Unable to unmarshal Adguard statistics to statistics struct model", err)
-	}
-
-	return &stats
-}
-
-// Function to get the log metrics
-func (c *Client) setLogMetrics(logdata *LogData) {
+	//LogQuery
 	m = make(map[string]int)
-	for i := range logdata.Data {
-		logstats := logdata.Data[i]
-		if logstats.DNS != nil {
-			for j := range logstats.DNS {
-				dnsType := logstats.DNS[j].Type
-				m[dnsType] += 1
+	logdata := logstats.Data
+	for i := range logdata {
+		dnsanswer := logdata[i].Answer
+		if dnsanswer != nil && len(dnsanswer) > 0 {
+			for j := range dnsanswer {
+				var dnsType string
+				//Check the type of dnsanswer[j].Value, if string leave it be, otherwise get back the object to get the correct DNS type
+				switch v := dnsanswer[j].Value.(type) {
+				case string:
+					dnsType = dnsanswer[j].Type
+					m[dnsType] += 1
+				case map[string]interface{}:
+					var dns65 Type65
+					mapstructure.Decode(v, &dns65)
+					dnsType = "TYPE" + strconv.Itoa(dns65.Hdr.Rrtype)
+					m[dnsType] += 1
+				default:
+					continue
+				}
 			}
 		}
 	}
@@ -141,22 +147,55 @@ func (c *Client) setLogMetrics(logdata *LogData) {
 		metrics.QueryTypes.WithLabelValues(c.hostname, key).Set(float64(value))
 	}
 
+	//clear the map
 	for k := range m {
 		delete(m, k)
 	}
 }
 
-// Function to get the log stats
-func (c *Client) getLogStatistics() *LogData {
-	log.Printf("Getting log statistics")
+// Function to get the general stats
+func (c *Client) getStatistics() *AllStats {
 
-	var logdata LogData
-	logstatsURL := fmt.Sprintf(logstatsURLPattern, c.protocol, c.hostname, c.port)
-
-	req, err := http.NewRequest("GET", logstatsURL, nil)
+	var status Status
+	statusURL := fmt.Sprintf(statusURLPattern, c.protocol, c.hostname, c.port)
+	body := c.MakeRequest(statusURL)
+	err := json.Unmarshal(body, &status)
 	if err != nil {
-		log.Fatal("An error has occurred when creating HTTP statistics request ", err)
+		log.Println("Unable to unmarshal Adguard log statistics to log statistics struct model", err)
 	}
+
+	var stats Stats
+	statsURL := fmt.Sprintf(statsURLPattern, c.protocol, c.hostname, c.port)
+	body = c.MakeRequest(statsURL)
+	err = json.Unmarshal(body, &stats)
+	if err != nil {
+		log.Println("Unable to unmarshal Adguard statistics to statistics struct model", err)
+	}
+
+	var logstats LogStats
+	logstatsURL := fmt.Sprintf(logstatsURLPattern, c.protocol, c.hostname, c.port, c.logLimit)
+	body = c.MakeRequest(logstatsURL)
+	err = json.Unmarshal(body, &logstats)
+	if err != nil {
+		log.Println("Unable to unmarshal Adguard log statistics to log statistics struct model", err)
+	}
+
+	var allstats AllStats
+	allstats.status = &status
+	allstats.stats = &stats
+	allstats.logStats = &logstats
+
+	return &allstats
+}
+
+func (c *Client) MakeRequest(url string) []byte {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal("An error has occurred when creating HTTP statistics request", err)
+	}
+
+	req.Host = "adguard.home-lab.io"
+	req.Header.Add("User-Agent", "Mozilla/5.0")
 
 	if c.isUsingPassword() {
 		c.authenticateRequest(req)
@@ -164,26 +203,31 @@ func (c *Client) getLogStatistics() *LogData {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		log.Printf("An error has occurred during login to Adguard: %v", err)
+		log.Fatal("An error has occurred during login to Adguard", err)
+	}
+
+	if resp.StatusCode != 200 {
+		log.Fatal("An error occured in the request, Status Code ", resp.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("Unable to read Adguard statistics HTTP response", err)
+		log.Fatal("Unable to read Adguard statistics HTTP response", err)
 	}
 
-	err = json.Unmarshal(body, &logdata)
-	if err != nil {
-		log.Println("Unable to unmarshal Adguard log statistics to log statistics struct model", err)
-	}
-
-	return &logdata
+	return body
 }
 
 func (c *Client) isUsingPassword() bool {
-	return len(c.b64password) > 0
+	return len(c.password) > 0
 }
 
 func (c *Client) authenticateRequest(req *http.Request) {
-	req.Header.Add("Authorization", "Basic "+c.b64password)
+	req.SetBasicAuth(c.username, c.password)
+}
+
+func GetTlsConfig() *tls.Config {
+	return &tls.Config{
+		InsecureSkipVerify: true,
+	}
 }
