@@ -21,17 +21,17 @@ Grafana dashboard is [available here](https://grafana.com/dashboards/13330) on t
 You can download the latest version of the binary built for your architecture here:
 
 * Architecture **i386** [
-    [Darwin](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-darwin-386) /
-    [Linux](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-linux-386) /
-    [Windows](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-windows-386.exe)
+[Darwin](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-darwin-386) /
+[Linux](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-linux-386) /
+[Windows](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-windows-386.exe)
 ]
 * Architecture **amd64** [
-    [Darwin](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-darwin-amd64) /
-    [Linux](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-linux-amd64) /
-    [Windows](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-windows-amd64.exe)
+[Darwin](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-darwin-amd64) /
+[Linux](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-linux-amd64) /
+[Windows](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-windows-amd64.exe)
 ]
-* Architecture **armv7** [
-    [Linux](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-linux-arm)
+* Architecture **arm** [
+[Linux](https://github.com/ebrianne/adguard-exporter/releases/latest/download/adguard_exporter-linux-arm)
 ]
 
 ### From sources
@@ -61,32 +61,35 @@ In order to run the exporter, type the following command (arguments are optional
 Using a password
 
 ```bash
-$ ./adguard_exporter -adguard_hostname 192.168.1.10 -adguard_username admin -adguard_password qwerty
+$ ./adguard_exporter -adguard_protocol https -adguard_hostname 192.168.10.252 -adguard_username admin -adguard_password qwerty -log_limit 10000
 ```
 
 ```bash
-2020/11/02 18:17:02 ---------------------------------------
-2020/11/02 18:17:02 - AdGuard Home exporter configuration -
-2020/11/02 18:17:02 ---------------------------------------
-2020/11/02 18:17:02 AdguardProtocol : http
-2020/11/02 18:17:02 AdguardHostname : 192.168.1.10
-2020/11/02 18:17:02 AdguardPort : 80
-2020/11/02 18:17:02 AdguardUsername : admin
-2020/11/02 18:17:02 AdGuard Authentication Method : AdguardPassword
-2020/11/02 18:17:02 Port : 9617
-2020/11/02 18:17:02 Interval : 10s
-2020/11/02 18:17:02 ---------------------------------------
-2020/11/02 18:17:02 New Prometheus metric registered: avg_processing_time
-2020/11/02 18:17:02 New Prometheus metric registered: num_dns_queries
-2020/11/02 18:17:02 New Prometheus metric registered: num_blocked_filtering
-2020/11/02 18:17:02 New Prometheus metric registered: num_replaced_parental
-2020/11/02 18:17:02 New Prometheus metric registered: num_replaced_safebrowsing
-2020/11/02 18:17:02 New Prometheus metric registered: num_replaced_safesearch
-2020/11/02 18:17:02 New Prometheus metric registered: top_queried_domains
-2020/11/02 18:17:02 New Prometheus metric registered: top_blocked_domains
-2020/11/02 18:17:02 New Prometheus metric registered: top_clients
-2020/11/02 18:17:02 Starting HTTP server
-2020/11/02 18:17:13 New tick of statistics: 737 ads blocked / 6492 total DNS queries
+2020/11/04 17:16:14 ---------------------------------------
+2020/11/04 17:16:14 - AdGuard Home exporter configuration -
+2020/11/04 17:16:14 ---------------------------------------
+2020/11/04 17:16:14 AdguardProtocol : https
+2020/11/04 17:16:14 AdguardHostname : 192.168.10.252
+2020/11/04 17:16:14 AdguardUsername : admin
+2020/11/04 17:16:14 AdGuard Authentication Method : AdguardPassword
+2020/11/04 17:16:14 ServerPort : 9617
+2020/11/04 17:16:14 Interval : 10s
+2020/11/04 17:16:14 LogLimit : 10000
+2020/11/04 17:16:14 ---------------------------------------
+2020/11/04 17:16:14 New Prometheus metric registered: avg_processing_time
+2020/11/04 17:16:14 New Prometheus metric registered: num_dns_queries
+2020/11/04 17:16:14 New Prometheus metric registered: num_blocked_filtering
+2020/11/04 17:16:14 New Prometheus metric registered: num_replaced_parental
+2020/11/04 17:16:14 New Prometheus metric registered: num_replaced_safebrowsing
+2020/11/04 17:16:14 New Prometheus metric registered: num_replaced_safesearch
+2020/11/04 17:16:14 New Prometheus metric registered: top_queried_domains
+2020/11/04 17:16:14 New Prometheus metric registered: top_blocked_domains
+2020/11/04 17:16:14 New Prometheus metric registered: top_clients
+2020/11/04 17:16:14 New Prometheus metric registered: query_types
+2020/11/04 17:16:14 New Prometheus metric registered: running
+2020/11/04 17:16:14 New Prometheus metric registered: protection_enabled
+2020/11/04 17:16:14 Starting HTTP server
+2020/11/04 17:16:30 New tick of statistics: 3824 ads blocked / 36367 total DNS queries
 ```
 
 Once the exporter is running, you also have to update your `prometheus.yml` configuration to let it scrape the exporter:
@@ -94,26 +97,32 @@ Once the exporter is running, you also have to update your `prometheus.yml` conf
 ```yaml
 scrape_configs:
   - job_name: 'adguard'
-    static_configs:
-      - targets: ['localhost:9617']
+  static_configs:
+  - targets: ['localhost:9617']
 ```
 
 ## Available CLI options
 ```bash
 # Interval of time the exporter will fetch data from Adguard
-  -interval duration (optional) (default 10s)
+-interval duration (optional) (default 10s)
+
+# Protocol to use to query Adguard
+-adguard_protocol string (optional: "http", "https") (default "http")
 
 # Hostname of the Raspberry PI where Adguard is installed
-  -adguard_hostname string (optional) (default "127.0.0.1")
+-adguard_hostname string (optional) (default "127.0.0.1")
 
 # Username to login to Adguard Home
-  -adguard_username string (optional)
+-adguard_username string (optional)
 
 # Password defined on the Adguard interface
-  -adguard_password string (optional)
+-adguard_password string (optional)
+
+# Limit for the return log data
+-log_limit string (optional) (default "1000")
 
 # Port to be used for the exporter
-  -port string (optional) (default "9617")
+-server_port string (optional) (default "9617")
 ```
 
 ## Available Prometheus metrics
@@ -130,3 +139,5 @@ scrape_configs:
 | adguard_top_clients               | This represent the top clients                                       |
 | adguard_top_queried_domains       | This represent the top domains that are queried                      |
 | adguard_query_types               | This represent the types of DNS queries                              |
+| running                           | Is Adguard running?                                                  |
+| protection_enabled                | Is the protection enabled?                                           |
