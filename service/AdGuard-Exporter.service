@@ -1,0 +1,14 @@
+[Unit]
+Description=AdGuard-Exporter
+After=syslog.target network-online.target
+Requires=AdGuardHome.Service
+
+[Service]
+Type=simple
+ExecStart=/opt/adguard-exporter/service/servicestart.sh
+Restart=on-failure
+RestartSec=10s
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
